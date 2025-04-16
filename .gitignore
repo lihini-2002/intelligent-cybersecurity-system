@@ -1,0 +1,37 @@
+# Ignore Python cache and virtual environments
+__pycache__/
+*.py[cod]
+*.ipynb_checkpoints/
+env/
+.venv/
+
+# Ignore dataset artifacts
+*.csv
+*.tsv
+*.xlsx
+
+# Ignore large model files
+models/**/model.safetensors
+models/**/pytorch_model.bin
+models/**/tf_model.h5
+models/**/optimizer.pt
+models/**/training_args.bin
+
+# Ignore Hugging Face checkpoints
+results/**/checkpoint-*/model.safetensors
+results/**/checkpoint-*/optimizer.pt
+results/**/checkpoint-*/scheduler.pt
+
+# General ML artifacts
+*.pt
+*.bin
+*.h5
+*.tflite
+*.joblib
+*.safetensors
+
+# VS Code
+.vscode/
+
+# Mac system files
+.DS_Store
