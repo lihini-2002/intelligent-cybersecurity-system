@@ -105,6 +105,8 @@ Step 1: Downloaded Datasets - Kaggle phishing URL dataset: `phishing_site_urls.c
 
         Training Phase 3: Combined Training on Chunks 2 and 3
 
+            Google colab notebook :training_phase3.ipynb
+
             Step 1: Combine and Balance
             - Combined: `phishing_urls_part2.csv + phishing_urls_part3.csv`
             - Saved as: `phase2_combined.csv`
@@ -118,5 +120,49 @@ Step 1: Downloaded Datasets - Kaggle phishing URL dataset: `phishing_site_urls.c
             - Evaluated on: `phase2_test.csv`
             - Final model saved as:
             phishing_model_v2_after_phase3
-            
-            
+
+            Evaluation after training:
+            eval_loss: 0.027734674513339996
+            eval_accuracy: 0.9933316426237823
+            eval_precision: 0.9802350427350427
+            eval_recall: 0.9424756034925527
+            eval_f1: 0.9609845509295627
+
+--Phase 3: Evaluation and Model Selection--
+
+    To objectively compare the models trained in Phase 1 and Phase 3, an external phishing URL dataset was used for evaluation:
+
+    Dataset: PhiUSIIL Phishing URL Dataset (from Kaggle)
+
+    Purpose: This dataset was not used in any phase of model training. It served as a true  holdout set to benchmark final model performance on unseen phishing and legitimate URLs.
+
+    Preprocessing:
+        Lowercased all URLs
+        Removed protocol prefixes (http://, https://)
+        Removed trailing slashes
+        Kept only url and label columns
+
+        Preprocessed dataset : PhiUSIIL_Phishing_URL_Eval_Preprocessed.csv
+        Notebook used for cleaning the dataset: eval_dataset_cleaning.ipynb
+
+    Evaluation :
+        Both phishing_model_v1_after_phase1 and phishing_model_v2_after_phase3 were evaluated using Hugging Face's Trainer.evaluate() on this full evaluation set.
+
+        Colab Notebook: model_evaluation_url.ipynb
+
+
+        Final Evaluation Results (on PhiUSIIL Dataset)
+
+        Metric          model_v1            model_v2
+
+        Accuracy        0.5831              0.5831
+        Precision       0.5817              0.5817
+        Recall          0.9643              0.9643
+        F1 score        0.7257              0.7257
+        Eval loss       2.8182              2.8182
+
+    Final Model Selection:
+        -The models performed identically on the unseen PhiUSIIL dataset.
+        -Given that phishing_model_v1_after_phase1 is lighter, trained on less data, and already performs optimally, it was selected as the final model for deployment and integration.
+
+Selected Final Model: phishing_model_v1_after_phase1
