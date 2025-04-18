@@ -2,15 +2,19 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from pathlib import Path
 import torch
+from contextlib import asynccontextmanager
 from transformers import BertTokenizer, BertForSequenceClassification
 
-app = FastAPI(title="Phishing Detection API - Group 22")
+app = FastAPI(
+    title="Phishing Detection API",
+    lifespan=lifespan
+)
 
 # --------- Configurable Paths ---------
 BASE_DIR = Path(__file__).resolve().parent
 MODEL_DIR = BASE_DIR.parent / "models"
-SMS_MODEL_PATH = MODEL_DIR / "sms_model"
-URL_MODEL_PATH = MODEL_DIR / "url_model"
+SMS_MODEL_PATH = MODEL_DIR / "sms-birt-model"
+URL_MODEL_PATH = MODEL_DIR / "url-birt-model/phishing_model_v1_after_phase1"
 
 # --------- Request Schemas ---------
 class SMSRequest(BaseModel):
@@ -20,8 +24,9 @@ class URLRequest(BaseModel):
     url: str
 
 # --------- Load Models and Tokenizers ---------
-@app.on_event("startup")
-def load_models():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Load models at startup
     global sms_model, sms_tokenizer, url_model, url_tokenizer
 
     try:
@@ -33,10 +38,14 @@ def load_models():
         url_model = BertForSequenceClassification.from_pretrained(str(URL_MODEL_PATH))
         url_model.eval()
 
-        print("✅ Models loaded successfully.")
+        print(" Models successfully loaded at startup")
     except Exception as e:
-        print("❌ Error loading models:", e)
+        print(" Error loading models:", e)
         raise e
+
+    yield  # <-- this tells FastAPI: "I'm done with startup setup"
+
+    # You could do cleanup code here if needed on shutdown
 
 # --------- Inference Routes ---------
 @app.post("/predict/sms")
