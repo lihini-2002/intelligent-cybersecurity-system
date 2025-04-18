@@ -58,13 +58,17 @@ def predict_sms(request: SMSRequest):
         predicted_class = torch.argmax(probs).item()
         confidence = probs[predicted_class].item()
 
+        label = "phishing" if predicted_class == 1 else "legitimate"
+
         return {
             "class": predicted_class,
+            "label": label,
             "confidence": round(confidence, 4)
         }
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"SMS prediction failed: {str(e)}")
+
 
 @app.post("/predict/url")
 def predict_url(request: URLRequest):
@@ -76,8 +80,11 @@ def predict_url(request: URLRequest):
         predicted_class = torch.argmax(probs).item()
         confidence = probs[predicted_class].item()
 
+        label = "phishing" if predicted_class == 1 else "legitimate"
+
         return {
             "class": predicted_class,
+            "label": label,
             "confidence": round(confidence, 4)
         }
 
