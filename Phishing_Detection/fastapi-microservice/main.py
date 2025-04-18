@@ -3,18 +3,13 @@ from pydantic import BaseModel
 from pathlib import Path
 import torch
 from contextlib import asynccontextmanager
-from transformers import BertTokenizer, BertForSequenceClassification
-
-app = FastAPI(
-    title="Phishing Detection API",
-    lifespan=lifespan
-)
+from transformers import BertTokenizer, BertForSequenceClassification, DistilBertTokenizer, DistilBertForSequenceClassification
 
 # --------- Configurable Paths ---------
 BASE_DIR = Path(__file__).resolve().parent
 MODEL_DIR = BASE_DIR.parent / "models"
-SMS_MODEL_PATH = MODEL_DIR / "sms-birt-model"
-URL_MODEL_PATH = MODEL_DIR / "url-birt-model/phishing_model_v1_after_phase1"
+SMS_MODEL_PATH = MODEL_DIR / "sms-bert-model"
+URL_MODEL_PATH = MODEL_DIR / "url-bert-model/phishing_model_v1_after_phase1"
 
 # --------- Request Schemas ---------
 class SMSRequest(BaseModel):
@@ -30,12 +25,14 @@ async def lifespan(app: FastAPI):
     global sms_model, sms_tokenizer, url_model, url_tokenizer
 
     try:
+        # Load SMS model (still BERT)
         sms_tokenizer = BertTokenizer.from_pretrained(str(SMS_MODEL_PATH))
         sms_model = BertForSequenceClassification.from_pretrained(str(SMS_MODEL_PATH))
         sms_model.eval()
 
-        url_tokenizer = BertTokenizer.from_pretrained(str(URL_MODEL_PATH))
-        url_model = BertForSequenceClassification.from_pretrained(str(URL_MODEL_PATH))
+        # Load URL model (now DistilBERT)
+        url_tokenizer = DistilBertTokenizer.from_pretrained(str(URL_MODEL_PATH))
+        url_model = DistilBertForSequenceClassification.from_pretrained(str(URL_MODEL_PATH))
         url_model.eval()
 
         print(" Models successfully loaded at startup")
@@ -46,6 +43,12 @@ async def lifespan(app: FastAPI):
     yield  # <-- this tells FastAPI: "I'm done with startup setup"
 
     # You could do cleanup code here if needed on shutdown
+
+
+app = FastAPI(
+    title="Phishing Detection API",
+    lifespan=lifespan
+)
 
 # --------- Inference Routes ---------
 @app.post("/predict/sms")
