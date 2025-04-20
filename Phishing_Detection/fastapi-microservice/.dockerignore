@@ -1,0 +1,17 @@
+#Ignore the virtual environment
+venv
+
+#Ignore python cache files
+__pycache__/
+*.pyo
+*.py[cod]
+
+#macos system files
+.DS_Store
+
+#git version control files
+.git
+.gitignore
+
+#jupyter notebook checkpoints
+.ipynb_checkpoints
