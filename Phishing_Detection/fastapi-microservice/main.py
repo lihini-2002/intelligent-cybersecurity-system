@@ -7,7 +7,7 @@ from transformers import BertTokenizer, BertForSequenceClassification, DistilBer
 
 # --------- Configurable Paths ---------
 BASE_DIR = Path(__file__).resolve().parent
-MODEL_DIR = BASE_DIR.parent / "models"
+MODEL_DIR = BASE_DIR / "models"
 SMS_MODEL_PATH = MODEL_DIR / "sms-bert-model"
 URL_MODEL_PATH = MODEL_DIR / "url-bert-model/phishing_model_v1_after_phase1"
 
