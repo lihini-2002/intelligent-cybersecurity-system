@@ -26,13 +26,13 @@ async def lifespan(app: FastAPI):
 
     try:
         # Load SMS model (still BERT)
-        sms_tokenizer = BertTokenizer.from_pretrained(str(SMS_MODEL_PATH))
-        sms_model = BertForSequenceClassification.from_pretrained(str(SMS_MODEL_PATH))
+        sms_tokenizer = BertTokenizer.from_pretrained(str(SMS_MODEL_PATH),local_files_only=True)
+        sms_model = BertForSequenceClassification.from_pretrained(str(SMS_MODEL_PATH),local_files_only=True)
         sms_model.eval()
 
         # Load URL model (now DistilBERT)
-        url_tokenizer = DistilBertTokenizer.from_pretrained(str(URL_MODEL_PATH))
-        url_model = DistilBertForSequenceClassification.from_pretrained(str(URL_MODEL_PATH))
+        url_tokenizer = DistilBertTokenizer.from_pretrained(str(URL_MODEL_PATH),local_files_only=True)
+        url_model = DistilBertForSequenceClassification.from_pretrained(str(URL_MODEL_PATH),local_files_only=True)
         url_model.eval()
 
         print(" Models successfully loaded at startup")

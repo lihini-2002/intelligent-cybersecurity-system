@@ -33,4 +33,5 @@ EXPOSE 8000
 
 # ------------ Default Command ------------
 # Use uvicorn to serve the app with auto-reload turned OFF (for production)
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+
