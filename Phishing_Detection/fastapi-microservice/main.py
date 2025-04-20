@@ -53,7 +53,11 @@ app = FastAPI(
 # --------- Inference Routes ---------
 @app.post("/predict/sms")
 def predict_sms(request: SMSRequest):
+    print(f"Incoming SMS: {request.message}")
     try:
+        if len(request.message) > 500:
+            raise HTTPException(status_code=400, detail="Message too long (max 500 characters)")
+
         inputs = sms_tokenizer(request.message, return_tensors="pt", truncation=True, padding=True)
         with torch.no_grad():
             outputs = sms_model(**inputs)
@@ -75,7 +79,11 @@ def predict_sms(request: SMSRequest):
 
 @app.post("/predict/url")
 def predict_url(request: URLRequest):
+    print(f"Incoming URL: {request.url}")
     try:
+        if len(request.url) > 2048:
+            raise HTTPException(status_code=400, detail="URL too long (max 2048 characters)")
+
         inputs = url_tokenizer(request.url, return_tensors="pt", truncation=True, padding=True)
         with torch.no_grad():
             outputs = url_model(**inputs)
@@ -93,3 +101,7 @@ def predict_url(request: URLRequest):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"URL prediction failed: {str(e)}")
+
+@app.get("/health")
+def health_check():
+    return {"status": "ok"}
