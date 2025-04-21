@@ -2,6 +2,9 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from pathlib import Path
 import torch
+import os
+import boto3
+from botocore.exceptions import NoCredentialsError, ClientError
 from contextlib import asynccontextmanager
 from transformers import BertTokenizer, BertForSequenceClassification, DistilBertTokenizer, DistilBertForSequenceClassification
 
@@ -10,6 +13,39 @@ BASE_DIR = Path(__file__).resolve().parent
 MODEL_DIR = BASE_DIR / "models"
 SMS_MODEL_PATH = MODEL_DIR / "sms-bert-model"
 URL_MODEL_PATH = MODEL_DIR / "url-bert-model/phishing_model_v1_after_phase1"
+
+def download_model_from_s3(bucket_name, s3_prefix, local_dir):
+    """
+    Downloads an entire folder (prefix) from an S3 bucket to a local directory.
+    """
+    s3 = boto3.client('s3')
+
+    try:
+        # List all objects in the S3 folder (prefix)
+        objects = s3.list_objects_v2(Bucket=bucket_name, Prefix=s3_prefix)
+
+        if 'Contents' not in objects:
+            print(f"No objects found at s3://{bucket_name}/{s3_prefix}")
+            return False
+
+        for obj in objects['Contents']:
+            s3_key = obj['Key']
+            file_name = s3_key.replace(s3_prefix, "").lstrip("/")
+
+            if not file_name:  # It's a folder
+                continue
+
+            local_path = os.path.join(local_dir, file_name)
+            os.makedirs(os.path.dirname(local_path), exist_ok=True)
+            s3.download_file(bucket_name, s3_key, local_path)
+            print(f"Downloaded {s3_key} to {local_path}")
+
+        return True
+
+    except (NoCredentialsError, ClientError) as e:
+        print(f"Failed to download from S3: {e}")
+        return False
+
 
 # --------- Request Schemas ---------
 class SMSRequest(BaseModel):
