@@ -18,7 +18,7 @@ def download_model_from_s3(bucket_name, s3_prefix, local_dir):
     """
     Downloads an entire folder (prefix) from an S3 bucket to a local directory.
     """
-    s3 = boto3.client('phishing-models-lihini-2002')
+    s3 = boto3.client('s3')
 
     try:
         # List all objects in the S3 folder (prefix)
@@ -59,7 +59,7 @@ class URLRequest(BaseModel):
 async def lifespan(app: FastAPI):
     global sms_model, sms_tokenizer, url_model, url_tokenizer
 
-    bucket_name = "phishing-models"
+    bucket_name = "phishing-models-lihini-2002"
     
     sms_s3_prefix = "sms-bert-model"
     url_s3_prefix = "url-bert-model/phishing_model_v1_after_phase1"
