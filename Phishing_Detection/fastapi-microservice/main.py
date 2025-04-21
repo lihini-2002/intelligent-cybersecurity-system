@@ -57,29 +57,39 @@ class URLRequest(BaseModel):
 # --------- Load Models and Tokenizers ---------
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Load models at startup
     global sms_model, sms_tokenizer, url_model, url_tokenizer
 
+    bucket_name = "phishing-models"
+    
+    sms_s3_prefix = "sms-bert-model"
+    url_s3_prefix = "url-bert-model/phishing_model_v1_after_phase1"
+
+    sms_local_path = BASE_DIR / "models/sms-bert-model"
+    url_local_path = BASE_DIR / "models/url-bert-model/phishing_model_v1_after_phase1"
+
+    # Download SMS model
+    print("⬇️ Downloading SMS model...")
+    download_model_from_s3(bucket_name, sms_s3_prefix, sms_local_path)
+
+    print("⬇️ Downloading URL model...")
+    download_model_from_s3(bucket_name, url_s3_prefix, url_local_path)
+
     try:
-        # Load SMS model (still BERT)
-        sms_tokenizer = BertTokenizer.from_pretrained(str(SMS_MODEL_PATH),local_files_only=True)
-        sms_model = BertForSequenceClassification.from_pretrained(str(SMS_MODEL_PATH),local_files_only=True)
+        sms_tokenizer = BertTokenizer.from_pretrained(str(sms_local_path))
+        sms_model = BertForSequenceClassification.from_pretrained(str(sms_local_path))
         sms_model.eval()
 
-        # Load URL model (now DistilBERT)
-        url_tokenizer = DistilBertTokenizer.from_pretrained(str(URL_MODEL_PATH),local_files_only=True)
-        url_model = DistilBertForSequenceClassification.from_pretrained(str(URL_MODEL_PATH),local_files_only=True)
+        url_tokenizer = DistilBertTokenizer.from_pretrained(str(url_local_path))
+        url_model = DistilBertForSequenceClassification.from_pretrained(str(url_local_path))
         url_model.eval()
 
-        print(" Models successfully loaded at startup")
+        print("Models successfully loaded from S3 at startup")
+
     except Exception as e:
         print(" Error loading models:", e)
         raise e
 
-    yield  # <-- this tells FastAPI: "I'm done with startup setup"
-
-    # You could do cleanup code here if needed on shutdown
-
+    yield  # Startup done
 
 app = FastAPI(
     title="Phishing Detection API",
