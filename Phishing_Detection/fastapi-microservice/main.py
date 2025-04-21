@@ -68,10 +68,10 @@ async def lifespan(app: FastAPI):
     url_local_path = BASE_DIR / "models/url-bert-model/phishing_model_v1_after_phase1"
 
     # Download SMS model
-    print("⬇️ Downloading SMS model...")
+    print("Downloading SMS model...")
     download_model_from_s3(bucket_name, sms_s3_prefix, sms_local_path)
 
-    print("⬇️ Downloading URL model...")
+    print("Downloading URL model...")
     download_model_from_s3(bucket_name, url_s3_prefix, url_local_path)
 
     try:
