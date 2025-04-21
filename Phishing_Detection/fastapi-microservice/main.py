@@ -18,7 +18,7 @@ def download_model_from_s3(bucket_name, s3_prefix, local_dir):
     """
     Downloads an entire folder (prefix) from an S3 bucket to a local directory.
     """
-    s3 = boto3.client('s3')
+    s3 = boto3.client('phishing-models-lihini-2002')
 
     try:
         # List all objects in the S3 folder (prefix)
