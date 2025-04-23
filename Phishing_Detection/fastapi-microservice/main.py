@@ -74,6 +74,7 @@ async def lifespan(app: FastAPI):
     print("Downloading URL model...")
     download_model_from_s3(bucket_name, url_s3_prefix, url_local_path)
 
+    print("Loading tokenizers and models into memory...")
     try:
         sms_tokenizer = BertTokenizer.from_pretrained(str(sms_local_path))
         sms_model = BertForSequenceClassification.from_pretrained(str(sms_local_path))
