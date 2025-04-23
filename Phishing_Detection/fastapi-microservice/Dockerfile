@@ -29,9 +29,9 @@ COPY --chown=appuser:appuser models ./models
 
 # ------------ Expose Port ------------
 # FastAPI runs on port 8000 by default inside container
-EXPOSE 8000
+EXPOSE 8080
 
 # ------------ Default Command ------------
 # Use uvicorn to serve the app with auto-reload turned OFF (for production)
-CMD ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
 
