@@ -3,8 +3,8 @@ from pydantic import BaseModel
 from pathlib import Path
 import torch
 import os
-import boto3
-from botocore.exceptions import NoCredentialsError, ClientError
+#import boto3
+#from botocore.exceptions import NoCredentialsError, ClientError
 from contextlib import asynccontextmanager
 from transformers import BertTokenizer, BertForSequenceClassification, DistilBertTokenizer, DistilBertForSequenceClassification
 
@@ -14,37 +14,6 @@ MODEL_DIR = BASE_DIR / "models"
 SMS_MODEL_PATH = MODEL_DIR / "sms-bert-model"
 URL_MODEL_PATH = MODEL_DIR / "url-bert-model/phishing_model_v1_after_phase1"
 
-def download_model_from_s3(bucket_name, s3_prefix, local_dir):
-    """
-    Downloads an entire folder (prefix) from an S3 bucket to a local directory.
-    """
-    s3 = boto3.client('s3')
-
-    try:
-        # List all objects in the S3 folder (prefix)
-        objects = s3.list_objects_v2(Bucket=bucket_name, Prefix=s3_prefix)
-
-        if 'Contents' not in objects:
-            print(f"No objects found at s3://{bucket_name}/{s3_prefix}")
-            return False
-
-        for obj in objects['Contents']:
-            s3_key = obj['Key']
-            file_name = s3_key.replace(s3_prefix, "").lstrip("/")
-
-            if not file_name:  # It's a folder
-                continue
-
-            local_path = os.path.join(local_dir, file_name)
-            os.makedirs(os.path.dirname(local_path), exist_ok=True)
-            s3.download_file(bucket_name, s3_key, local_path)
-            print(f"Downloaded {s3_key} to {local_path}")
-
-        return True
-
-    except (NoCredentialsError, ClientError) as e:
-        print(f"Failed to download from S3: {e}")
-        return False
 
 
 # --------- Request Schemas ---------
@@ -59,20 +28,8 @@ class URLRequest(BaseModel):
 async def lifespan(app: FastAPI):
     global sms_model, sms_tokenizer, url_model, url_tokenizer
 
-    bucket_name = "phishing-models-lihini-2002"
-    
-    sms_s3_prefix = "sms-bert-model"
-    url_s3_prefix = "url-bert-model/phishing_model_v1_after_phase1"
-
     sms_local_path = BASE_DIR / "models/sms-bert-model"
     url_local_path = BASE_DIR / "models/url-bert-model/phishing_model_v1_after_phase1"
-
-    # Download SMS model
-    print("Downloading SMS model...")
-    download_model_from_s3(bucket_name, sms_s3_prefix, sms_local_path)
-
-    print("Downloading URL model...")
-    download_model_from_s3(bucket_name, url_s3_prefix, url_local_path)
 
     print("Loading tokenizers and models into memory...")
     try:
@@ -84,13 +41,14 @@ async def lifespan(app: FastAPI):
         url_model = DistilBertForSequenceClassification.from_pretrained(str(url_local_path))
         url_model.eval()
 
-        print("Models successfully loaded from S3 at startup")
+        print("Models successfully loaded from local path")
 
     except Exception as e:
-        print(" Error loading models:", e)
+        print("Error loading models:", e)
         raise e
 
-    yield  # Startup done
+    yield  # Startup complete
+
 
 app = FastAPI(
     title="Phishing Detection API",
