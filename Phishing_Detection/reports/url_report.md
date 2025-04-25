@@ -128,7 +128,7 @@ Step 1: Downloaded Datasets - Kaggle phishing URL dataset: `phishing_site_urls.c
             eval_recall: 0.9424756034925527
             eval_f1: 0.9609845509295627
 
---Phase 3: Evaluation and Model Selection--
+--Phase 2: Evaluation and Model Selection--
 
     To objectively compare the models trained in Phase 1 and Phase 3, an external phishing URL dataset was used for evaluation:
 
